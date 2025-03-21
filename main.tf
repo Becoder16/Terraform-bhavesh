@@ -31,6 +31,7 @@ lifecycle {
 resource "aws_subnet" "Devsecops-subnet" {
   vpc_id     = aws_vpc.Devsecops-vpc.id
   cidr_block = "${var.subnet_cidr}"
+  availability_zone = "${var.az}"
 
   tags = {
     Name = "Devsecops-subnet"
