@@ -1,8 +1,4 @@
-
 pipeline {
-    options {
-        ansiColor('xterm')
-    }
     environment {
         AWS_ACCESS_KEY_ID     = credentials('AWS-Access-key')
         AWS_SECRET_ACCESS_KEY = credentials('AWS-Secret-access-key')
@@ -12,16 +8,27 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/SachinJayswal01/Terraform.git'
+                git branch: 'main', url: 'https://github.com/Becoder16/Terraform-bhavesh'
             }
         }
+
+        stage('SonarQube Analysis') {
+            steps {
+                // Use the name you configured in Jenkins SonarQube server
+                withSonarQubeEnv('sonarqube') {
+                    sh 'sonar-scanner -Dproject.settings=sonar/sonar-project.properties'
+                }
+            }
+        }
+
         stage('Plan') {
             steps {
                 sh 'terraform init'
                 sh "terraform plan"
             }
         }
-                stage('Approval') {
+
+        stage('Approval') {
             steps {
                 script {
                    timeout(time: 1, unit: 'HOURS') {
@@ -31,6 +38,7 @@ pipeline {
                 echo "Approval status: ${approvalStatus}"
             }
         }
+
         stage('Apply') {
             when {
                 expression { approvalStatus["ApprovalStatus"] == 'Approved' }
